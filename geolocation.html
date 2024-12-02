@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geolocation API Test</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+    <div id="app">
+            <h1>Geolocation API Test</h1>
+
+            <h2>經度：{{lat}}</h2> 
+
+            <h2>緯度：{{lng}}</h2> 
+
+            <h2>精準度：{{accuracy}}</h2> 
+    </div>
+</body>
+<script>
+    // 判斷瀏覽器是否支援 geolocation API 
+    if ("geolocation" in navigator) {
+         console.log(`OK!`);
+
+         Vue.createApp({
+            
+            data(){     // 變數放這裡
+                return {
+                    options:{
+                        enableHighAccuracy: true, 
+                        timeout: 60000,          
+                        maximumAge: 60000       
+                    },
+                    lat: 0,
+                    lng: 0,
+                    accuracy:0,
+
+                }
+            },
+
+            methods: {  // 函數(方法)大部分放這裡
+                
+                success_getlocation(pos){                    
+                    this.lat = pos.coords.latitude
+                    this.lng = pos.coords.longitude
+                    this.accuracy = pos.coords.accuracy
+                    console.log(this.lat)
+                    console.log(this.lng)
+                    console.log(this.accuracy);           
+                 },
+                 error_getlocation(){
+                    console.log("位置定位失敗");            
+                },
+            },
+            mounted() {
+                
+                // navigator.geolocation.getCurrentPosition(
+                //     (pos) => this.success_getlocation(pos),  // 使用箭頭函數保證 this 正確
+                //     () => this.error_getlocation(),         // 使用箭頭函數     
+                //     this.options
+                // )
+                navigator.geolocation.watchPosition(
+                    (pos) => this.success_getlocation(pos),
+                    () => this.error_getlocation(),
+                    this.options
+                )
+
+            },
+
+        }).mount('#app')
+       
+         
+    } else 
+    {
+     console.log(`Not Support!`);
+    }
+
+
+
+
+</script>
+</html>
