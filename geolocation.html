@@ -18,6 +18,8 @@
             <h2>精準度：{{accuracy}}</h2> 
 
             <h2>{{check_result}}</h2>
+
+            <h2>距離：{{distanc}}</h2>
     </div>
 </body>
 <script>
@@ -41,6 +43,7 @@
                     targetLng: 121.4964906,
                     radius: 50,             //距離範圍限制半徑 50 公尺
                     check_result: false, 
+                    distanc: 0
                 }
             },
 
@@ -54,7 +57,7 @@
                     console.log(this.lng)
                     console.log(this.accuracy);   
                     console.log(this.getDistanceFromLatLon(this.lat,this.lng,this.targetLat,this.targetLng));                    
-
+                    this.distanc = this.getDistanceFromLatLon(this.lat,this.lng,this.targetLat,this.targetLng)
                  },
                  error_getlocation(){
                     console.log("位置定位失敗");            
