@@ -16,12 +16,14 @@
             
 
             <h2>精準度：{{accuracy}}</h2> 
+
+            <h2>{{check_result}}</h2>
     </div>
 </body>
 <script>
     // 判斷瀏覽器是否支援 geolocation API 
     if ("geolocation" in navigator) {
-         console.log(`OK!`);
+         console.log(`OK! geolocation API is Support!`);
 
          Vue.createApp({
             
@@ -35,7 +37,10 @@
                     lat: 0,
                     lng: 0,
                     accuracy:0,
-
+                    targetLat: 25.033964,   //判斷目標經緯度
+                    targetLng: 121.564468,
+                    radius: 50,             //距離範圍限制半徑 50 公尺
+                    check_result: false, 
                 }
             },
 
@@ -47,11 +52,29 @@
                     this.accuracy = pos.coords.accuracy
                     console.log(this.lat)
                     console.log(this.lng)
-                    console.log(this.accuracy);           
+                    console.log(this.accuracy);   
+                    console.log(this.getDistanceFromLatLon(this.lat,this.lng,this.targetLat,this.targetLng));                    
+
                  },
                  error_getlocation(){
                     console.log("位置定位失敗");            
                 },
+                 getDistanceFromLatLon(lat1, lon1, lat2, lon2) {
+                    const R = 6371000; // 地球半徑 (公尺)
+                    const dLat = (lat2 - lat1) * Math.PI / 180;
+                    const dLon = (lon2 - lon1) * Math.PI / 180;
+                    const a = 
+                        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                    return R * c; // 距離（公尺）
+                }
+
+
+            },
+            computed: { // 函數(方法)也可以放這裡，但是放在這裡的函數(方法)不用傳參數，一定要有傳回值
+
             },
             mounted() {
                 
