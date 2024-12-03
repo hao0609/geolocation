@@ -13,13 +13,17 @@
             <h2>經度：{{lat}}</h2> 
 
             <h2>緯度：{{lng}}</h2> 
+
+            <h2>捷運站經緯度</h2>
             
+            緯度：<input type="text" v-model="targetLat">
+            經度：<input type="text" v-model="targetLng">
 
             <h2>精準度：{{accuracy}}</h2> 
 
             <h2>{{check_result}}</h2>
 
-            <h2>距離：{{distanc}}</h2>
+            <h2>與捷運站距離：{{distanc}}</h2>
     </div>
 </body>
 <script>
