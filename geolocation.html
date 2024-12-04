@@ -123,7 +123,7 @@
                     
                     this.show_stations(this.user_selected_line);
 
-                    this.user_selected_station = document.querySelector('#Stations').value
+                    
 
 
                 },
@@ -163,6 +163,10 @@
 
 
                 show_stations(line){
+
+                    this.user_selected_station = document.querySelector('#Stations').value
+
+
                     let url = `https://tdx.transportdata.tw/api/basic/v2/Rail/Metro/StationOfRoute/TRTC?$filter=LineID eq '${line}'&$top=1&$format=JSON`;
                     console.log(url);
                     
