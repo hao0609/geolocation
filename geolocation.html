@@ -20,24 +20,28 @@
 
             <h2>捷運站經緯度</h2>
 
-            請選擇捷運路線:  <input list="Lines" @change="selected_line" v-model="user_selected_line"> <br><br>
+            請選擇捷運路線:  
+            
 
-            <datalist id="Lines">
-                <option value="R"> 淡水信義線
-                <option value="G"> 松山新店線
-                <option value="BL"> 板南線
-                <option value="O"> 中和新爐線
-                <option value="BR"> 文湖線
-            </datalist>
+            <select  id="Lines" @change="selected_line" v-model="user_selected_line"> 
+                <option value="R"> 淡水信義線 </option>
+                    <option value="G"> 松山新店線</option>
+                    <option value="BL"> 板南線</option>
+                    <option value="O"> 中和新爐線</option>
+                    <option value="BR"> 文湖線</option>
+              </select>
+              <br><br>
 
 
-            請選擇捷運站:  <input list="Stations" > <br><br>
 
-            <datalist id="Stations">
+
+            請選擇捷運站: 
+
+            <select   id="Stations" @change="selected_station" v-model="user_selected_station"> 
                 <!-- <option value="永寧">  -->
-            </datalist>
+            </select>
 
-
+            <br><br>
             
             緯度：<input type="text" v-model="targetLat"><br>
             經度：<input type="text" v-model="targetLng"><br>
@@ -50,7 +54,10 @@
             <!-- https://tdx.transportdata.tw/api/basic/v2/Rail/Metro/StationOfRoute/TRTC?%24filter=contains%28LineID%2C%27BL%27%29&%24top=1&%24format=JSON -->
             <!-- URL 原文 -->
             <!-- https://tdx.transportdata.tw/api/basic/v2/Rail/Metro/StationOfRoute/TRTC?$filter=contains(LineID,'BL')&$top=1&$format=JSON -->
-            
+
+             <!-- 台北捷運各車站資料 API URL -->
+            <!-- https://tdx.transportdata.tw/api/basic/v2/Rail/Metro/Station/TRTC?$filter=contains(StationName/Zh_tw,'台北車站')&$format=JSON -->
+
     </div>
 </body>
 <script>
@@ -71,12 +78,14 @@
                     lat: 0,
                     lng: 0,
                     accuracy:0,
-                    targetLat: 25.00221178,   //判斷目標經緯度
-                    targetLng: 121.4964906,
+                    targetLat: 0,   //判斷目標經緯度
+                    targetLng: 0,
                     radius: 50,             //距離範圍限制半徑 50 公尺
                     check_result: false, 
                     distanc: 0,
                     user_selected_line:'',
+                    user_selected_station:'',
+                    api_token: '',
                 }
             },
 
@@ -111,18 +120,56 @@
                 selected_line(e){
                     console.log(e.target.value);
                     this.user_selected_line = e.target.value;
+                    
                     this.show_stations(this.user_selected_line);
 
                 },
 
-                show_stations(station){
-                    let url = `https://tdx.transportdata.tw/api/basic/v2/Rail/Metro/StationOfRoute/TRTC?$filter=LineID eq '${station}'&$top=1&$format=JSON`;
+                get_AcessToken(){
+
+                    fetch('https://tdx.transportdata.tw/auth/realms/TDXConnect/protocol/openid-connect/token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        grant_type: 'client_credentials',
+                        client_id: 'cnblue603-f97196a0-9a1d-41af',
+                        client_secret: '7801c921-3b21-4dbd-963d-d43d142df306'
+                    })
+                })
+                .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json(); // 獲取並解析 JSON
+                    })
+                    .then(result => {
+                       
+                        //console.log(result.access_token ); 
+                        this.api_token = result.access_token;
+
+                    })
+                    .catch(error => {
+                        console.error('Error fetching data:', error);
+                    });
+
+                        
+
+                },
+
+
+                show_stations(line){
+                    let url = `https://tdx.transportdata.tw/api/basic/v2/Rail/Metro/StationOfRoute/TRTC?$filter=LineID eq '${line}'&$top=1&$format=JSON`;
                     console.log(url);
                     
-                    setTimeout(() => {
+                    
 
                         let result =  fetch(url, {
-                    method: 'GET',})
+                    method: 'GET',
+                    headers: {
+                        'authorization': `Bearer ${this.api_token}`
+                    }})
                     
                     .then(response => {
                         if (!response.ok) {
@@ -133,6 +180,7 @@
                     .then(result => {
                         const stationData = result[0].Stations
                         console.log(stationData); 
+                        document.querySelector('#Stations').innerText = '';
                         stationData.forEach(element => {
                             console.log(element.StationName.Zh_tw);
                             document.querySelector('#Stations').innerHTML += `<option value="${element.StationName.Zh_tw}">${element.StationName.Zh_tw}</option>`
@@ -143,9 +191,52 @@
                         console.error('Error fetching data:', error);
                     });
                         
-                    }, 5000);
                     
                     
+                },
+
+                selected_station(e){ 
+                    console.log(e.target.value);
+                    this.user_selected_station = e.target.value;
+                    
+                    this.get_Station_location(this.user_selected_station);
+
+                },  
+
+                get_Station_location(station){
+                    
+
+                    let url = `https://tdx.transportdata.tw/api/basic/v2/Rail/Metro/Station/TRTC?$filter=contains(StationName/Zh_tw,'${station}')&$format=JSON`;
+                    console.log(url);
+                    
+                    
+
+                    let result =  fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'authorization': `Bearer ${this.api_token}`
+                    }})
+                    
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json(); // 獲取並解析 JSON
+                    })
+                    .then(result => {
+                        const stationData = result[0].StationPosition
+                        console.log(stationData); 
+                        let lat = stationData.PositionLat
+                        let lng = stationData.PositionLon
+
+                        
+                        this.targetLat = lat
+                        this.targetLng = lng
+
+                    })
+                    .catch(error => {
+                        console.error('Error fetching data:', error);
+                    });
                 }
 
 
@@ -165,6 +256,7 @@
                     () => this.error_getlocation(),
                     this.options
                 )
+                window.addEventListener('onload', this.get_AcessToken());
 
             },
 
