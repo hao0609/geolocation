@@ -181,9 +181,9 @@
                 
 
                     let url = `https://tdx.transportdata.tw/api/basic/v2/Rail/Metro/StationOfRoute/TRTC?$filter=LineID eq '${line}'&$top=1&$format=JSON`;
-                    console.log(url);
-                    
-                    
+                    // console.log(url);
+                    // let url = `https://tdx.transportdata.tw/api/basic/v2/Rail/Metro/StationOfRoute/TRTC?$filter=RouteID eq 'O-2'&$top=1&$format=JSON`;
+                    // 蘆洲到南勢角
 
                         let result =  fetch(url, {
                     method: 'GET',
@@ -198,6 +198,8 @@
                         return response.json(); // 獲取並解析 JSON
                     })
                     .then(result => {
+        
+                        
                         const stationData = result[0].Stations
                         console.log(stationData); 
                         document.querySelector('#Stations').innerText = '';
